@@ -1,3 +1,4 @@
+use std::env::Args;
 use std::{env, error::Error};
 
 use crate::client::RedisClient;
