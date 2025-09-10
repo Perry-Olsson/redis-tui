@@ -12,6 +12,8 @@ pub trait RedisClient {
 
     fn hget<T: ToRedisArgs>(&mut self, key: &T, field: &T) -> Result<Option<String>, Box<dyn Error>>;
 
+    fn hgetall<T: ToRedisArgs>(&mut self, key: &T) -> Result<Option<Vec<String>>, Box<dyn Error>>;
+
     fn set<T: ToRedisArgs>(&mut self, key: &T, val: &T) -> Result<(), Box<dyn Error>>;
 }
 
@@ -27,6 +29,11 @@ impl RedisClient for RedisRsClient {
 
     fn hget<T: ToRedisArgs>(&mut self, key: &T, field: &T) -> Result<Option<String>, Box<dyn Error>> {
         let res = cmd("HGET").arg(key).arg(field).query(&mut self.con)?;
+        Ok(res)
+    }
+
+    fn hgetall<T: ToRedisArgs>(&mut self, key: &T) -> Result<Option<Vec<String>>, Box<dyn Error>> {
+        let res = cmd("HGETALL").arg(key).query(&mut self.con)?;
         Ok(res)
     }
 
