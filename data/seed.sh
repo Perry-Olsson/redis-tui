@@ -5,4 +5,4 @@ num_posts=20
 
 redis-cli flushall
 
-redis-cli --eval "$script_dir/seed.lua" , $num_users $num_posts
+redis-cli --eval "$script_dir/seed.lua" , "$num_users" "$num_posts"

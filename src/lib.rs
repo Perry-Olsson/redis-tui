@@ -12,7 +12,8 @@ pub fn run() -> Result<(), Box<dyn Error>>{
     let client = get_client()?;
     match cmd {
         Get(args) => { get(args, client)?; },
-        Set(args) => { set(args, client)?; }
+        Set(args) => { set(args, client)?; },
+        HGet(args) => { hget(args, client)?; },
         NotFound(cmd) => { println!("Unexpected command: {}", cmd); }
     };
     Ok(())

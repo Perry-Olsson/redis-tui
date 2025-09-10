@@ -10,6 +10,8 @@ pub fn get_client() -> Result<RedisRsClient, RedisError> {
 pub trait RedisClient {
     fn get<T: ToRedisArgs>(&mut self, key: &T) -> Result<Option<String>, Box<dyn Error>>;
 
+    fn hget<T: ToRedisArgs>(&mut self, key: &T, field: &T) -> Result<Option<String>, Box<dyn Error>>;
+
     fn set<T: ToRedisArgs>(&mut self, key: &T, val: &T) -> Result<(), Box<dyn Error>>;
 }
 
@@ -20,6 +22,11 @@ pub struct RedisRsClient {
 impl RedisClient for RedisRsClient {
     fn get<T: ToRedisArgs>(&mut self, key: &T) -> Result<Option<String>, Box<dyn Error>> {
         let res = cmd("GET").arg(key).query(&mut self.con)?;
+        Ok(res)
+    }
+
+    fn hget<T: ToRedisArgs>(&mut self, key: &T, field: &T) -> Result<Option<String>, Box<dyn Error>> {
+        let res = cmd("HGET").arg(key).arg(field).query(&mut self.con)?;
         Ok(res)
     }
 
