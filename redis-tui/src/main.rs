@@ -1,3 +1,5 @@
+use redis_tui::run;
+
 fn main() {
-    println!("Hello, world!");
+    run()
 }
