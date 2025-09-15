@@ -1,5 +1,5 @@
 use crossterm::event::KeyCode;
-use redis_tui::{run, draw_hello};
+use redis_tui::hello_world::{draw_hello};
 use ratatui::{backend::TestBackend, Terminal};
 
 #[test]
