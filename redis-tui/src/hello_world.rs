@@ -1,8 +1,8 @@
+#[allow(dead_code)]
 use std::io;
 use crossterm::event::{self, Event};
 use ratatui::{text::Text, Frame};
 
-#[allow(dead_code)]
 pub fn run_hello_world() -> io::Result<()> {
     hello_world_loop()?;
     ratatui::restore();
