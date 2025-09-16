@@ -1,10 +1,7 @@
-#[allow(dead_code)]
 use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
-    buffer::Buffer,
-    layout::Rect,
     style::Stylize,
     symbols::border,
     text::{Line, Text},
@@ -39,7 +36,34 @@ impl App {
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
-        todo!();
+        match event::read()? {
+            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
+                self.handle_key_event(key_event)
+            },
+            _ => {}
+        };
+        Ok(())
+    }
+
+    fn handle_key_event(&mut self, event: KeyEvent) {
+        match event.code {
+            KeyCode::Left => self.decremenet_counter(),
+            KeyCode::Right => self.increment_counter(),
+            KeyCode::Char('q') => self.exit(),
+            _ => {}
+        }
+    }
+
+    fn exit(&mut self) {
+        self.exit = true;
+    }
+
+    fn increment_counter(&mut self) {
+        self.counter += 1;
+    }
+    
+    fn decremenet_counter(&mut self) {
+        self.counter -= 1;
     }
 }
 
@@ -48,11 +72,11 @@ impl Widget for &App {
         let title = Line::from(" Counter App Tutorial ".bold());
         let instructions = Line::from(vec![
             " Decrement ".into(),
-            "<Left>".blue().bold(),
+            "<Left>".green().bold(),
             " Increment ".into(),
-            "<Right>".blue().bold(),
+            "<Right>".green().bold(),
             " Quit ".into(),
-            "<Q> ".blue().bold()
+            "<Q> ".green().bold()
         ]);
 
         let block = Block::bordered()
@@ -75,7 +99,7 @@ impl Widget for &App {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ratatui::style::Style;
+    use ratatui::{buffer::Buffer, layout::Rect, style::Style};
 
     #[test]
     fn render() {
@@ -100,5 +124,21 @@ mod tests {
         expected.set_style(Rect::new(43, 3, 4, 1), key_style);
 
         assert_eq!(buf, expected);
+    }
+
+    #[test]
+    fn handle_key_event() -> io::Result<()> {
+        let mut app = App::default();
+        app.handle_key_event(KeyCode::Right.into());
+        assert_eq!(app.counter, 1);
+
+        app.handle_key_event(KeyCode::Left.into());
+        assert_eq!(app.counter, 0);
+
+        let mut app = App::default();
+        app.handle_key_event(KeyCode::Char('q').into());
+        assert!(app.exit);
+
+        Ok(())
     }
 }
