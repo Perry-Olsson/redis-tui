@@ -1,5 +1,4 @@
 pub mod counter_app;
-pub mod hello_world;
 
 use std::io;
 
