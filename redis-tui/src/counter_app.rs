@@ -37,6 +37,20 @@ pub struct AppState {
     exit: bool
 }
 
+impl AppState {
+    fn exit(&mut self) {
+        self.exit = true;
+    }
+
+    fn increment_counter(&mut self) {
+        self.counter += 1;
+    }
+    
+    fn decremenet_counter(&mut self) {
+        self.counter -= 1;
+    }
+}
+
 impl App<CrosstermBackend<Stdout>, CrosstermEventReader> {
     pub fn default() -> App<CrosstermBackend<Stdout>, CrosstermEventReader> {
         App::new(ratatui::init(), CrosstermEventReader{})
@@ -63,32 +77,20 @@ impl<B: Backend, T: EventReader> App<B, T> {
     fn handle_events(&mut self) -> io::Result<()> {
         match self.event_reader.read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                self.handle_key_event(key_event)
+                handle_key_event(&mut self.state, key_event)
             },
             _ => {}
         };
         Ok(())
     }
+}
 
-    fn handle_key_event(&mut self, event: KeyEvent) {
-        match event.code {
-            KeyCode::Left => self.decremenet_counter(),
-            KeyCode::Right => self.increment_counter(),
-            KeyCode::Char('q') => self.exit(),
-            _ => {}
-        }
-    }
-
-    fn exit(&mut self) {
-        self.state.exit = true;
-    }
-
-    fn increment_counter(&mut self) {
-        self.state.counter += 1;
-    }
-    
-    fn decremenet_counter(&mut self) {
-        self.state.counter -= 1;
+fn handle_key_event(state: &mut AppState, event: KeyEvent) {
+    match event.code {
+        KeyCode::Left => state.decremenet_counter(),
+        KeyCode::Right => state.increment_counter(),
+        KeyCode::Char('q') => state.exit(),
+        _ => {}
     }
 }
 
@@ -124,47 +126,19 @@ impl Widget for &AppState {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ratatui::{buffer::Buffer, layout::Rect, style::Style};
 
     #[test]
-    #[ignore]
-    fn render() {
-        let app = App::default();
-        let mut buf = Buffer::empty(Rect::new(0, 0, 50, 4));
+    fn handle_key_event_test() -> io::Result<()> {
+        println!("hello");
+        let mut app = AppState::default();
+        handle_key_event(&mut app, KeyCode::Right.into());
+        assert_eq!(app.counter, 1);
 
-        app.state.render(buf.area, &mut buf);
+        handle_key_event(&mut app, KeyCode::Left.into());
+        assert_eq!(app.counter, 0);
 
-        let mut expected = Buffer::with_lines(vec![
-            "┏━━━━━━━━━━━━━ Counter App Tutorial ━━━━━━━━━━━━━┓",
-            "┃                    Value: 0                    ┃",
-            "┃                                                ┃",
-            "┗━ Decrement <Left> Increment <Right> Quit <Q> ━━┛",
-        ]);
-        let title_style = Style::new().bold();
-        let counter_style = Style::new().yellow();
-        let key_style = Style::new().blue().bold();
-        expected.set_style(Rect::new(14, 0, 22, 1), title_style);
-        expected.set_style(Rect::new(28, 1, 1, 1), counter_style);
-        expected.set_style(Rect::new(13, 3, 6, 1), key_style);
-        expected.set_style(Rect::new(30, 3, 7, 1), key_style);
-        expected.set_style(Rect::new(43, 3, 4, 1), key_style);
-
-        assert_eq!(buf, expected);
-    }
-
-    #[test]
-    #[ignore]
-    fn handle_key_event() -> io::Result<()> {
-        let mut app = App::default();
-        app.handle_key_event(KeyCode::Right.into());
-        assert_eq!(app.state.counter, 1);
-
-        app.handle_key_event(KeyCode::Left.into());
-        assert_eq!(app.state.counter, 0);
-
-        let mut app = App::default();
-        app.handle_key_event(KeyCode::Char('q').into());
-        assert!(app.state.exit);
+        handle_key_event(&mut app, KeyCode::Char('q').into());
+        assert!(app.exit);
 
         Ok(())
     }
