@@ -1,33 +1,66 @@
-use std::io::{self, Stdout};
+use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use ratatui::backend::TestBackend;
 use ratatui::{
-    prelude::{Backend, CrosstermBackend}, style::Stylize, symbols::border, text::{Line, Text}, widgets::{Block, Paragraph, Widget}, Terminal
+    prelude::Backend,
+    style::Stylize,
+    symbols::border,
+    text::{Line, Text},
+    widgets::{Block, Paragraph, Widget},
+    DefaultTerminal,
+    Terminal
 };
 
 pub fn run() -> io::Result<()> {
-    let app_result = App::default().run();
+    let mut terminal = ratatui::init();
+    let app_result = App::default().run(&mut terminal);
     ratatui::restore();
     app_result
 }
 
-pub trait EventReader {
-    fn read(&self) -> std::io::Result<Event>;
-}
-
-pub struct CrosstermEventReader {}
-
-impl EventReader for CrosstermEventReader {
-    fn read(&self) -> std::io::Result<Event> {
-        event::read()
-    }
-}
-
-#[derive(Debug)]
-pub struct App<B: Backend, E: EventReader> {
-    terminal: Terminal<B>,
-    event_reader: E,
+#[derive(Debug, Default)]
+pub struct App {
     state: AppState
+}
+
+impl App {
+    pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
+        while !self.state.exit {
+            self.draw_frame(terminal)?;
+            self.read_and_handle_events()?;
+        }
+        Ok(())
+    }
+
+    fn draw_frame<T: Backend>(&mut self, terminal: &mut Terminal<T>) -> io::Result<()> {
+        terminal.draw(|frame| frame.render_widget(&self.state, frame.area()))?;
+        Ok(())
+    }
+
+    fn read_and_handle_events(&mut self) -> io::Result<()> {
+        handle_event(&mut self.state, event::read()?);
+        Ok(())
+    }
+
+}
+
+fn handle_event(state: &mut AppState, event: Event) {
+    match event {
+        Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
+            handle_key_event(state, key_event)
+        },
+        _ => {}
+    };
+}
+
+fn handle_key_event(state: &mut AppState, event: KeyEvent) {
+    match event.code {
+        KeyCode::Left => state.decremenet_counter(),
+        KeyCode::Right => state.increment_counter(),
+        KeyCode::Char('q') => state.exit(),
+        _ => {}
+    }
 }
 
 
@@ -48,49 +81,6 @@ impl AppState {
     
     fn decremenet_counter(&mut self) {
         self.counter -= 1;
-    }
-}
-
-impl App<CrosstermBackend<Stdout>, CrosstermEventReader> {
-    pub fn default() -> App<CrosstermBackend<Stdout>, CrosstermEventReader> {
-        App::new(ratatui::init(), CrosstermEventReader{})
-    }
-}
-
-impl<B: Backend, T: EventReader> App<B, T> {
-    pub fn new(terminal: Terminal<B>, event_reader: T) -> App<B, T> {
-        App { terminal, event_reader, state: AppState::default() }
-    }
-
-    pub fn run(&mut self) -> io::Result<()> {
-        while !self.state.exit {
-            self.terminal.draw(|frame| frame.render_widget(&self.state, frame.area()))?;
-            self.handle_events()?;
-        }
-        Ok(())
-    }
-
-    pub fn backend(&self) -> &B {
-        self.terminal.backend()
-    }
-
-    fn handle_events(&mut self) -> io::Result<()> {
-        match self.event_reader.read()? {
-            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                handle_key_event(&mut self.state, key_event)
-            },
-            _ => {}
-        };
-        Ok(())
-    }
-}
-
-fn handle_key_event(state: &mut AppState, event: KeyEvent) {
-    match event.code {
-        KeyCode::Left => state.decremenet_counter(),
-        KeyCode::Right => state.increment_counter(),
-        KeyCode::Char('q') => state.exit(),
-        _ => {}
     }
 }
 
@@ -123,23 +113,27 @@ impl Widget for &AppState {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub struct TestTui {
+    app: App,
+    terminal: Terminal<TestBackend>
+}
 
-    #[test]
-    fn handle_key_event_test() -> io::Result<()> {
-        println!("hello");
-        let mut app = AppState::default();
-        handle_key_event(&mut app, KeyCode::Right.into());
-        assert_eq!(app.counter, 1);
+impl TestTui {
+    pub fn new(width: u16, height: u16) -> TestTui {
+        let backend = TestBackend::new(width, height);
+        let terminal = Terminal::new(backend).unwrap();
+        let app = App::default();
+        TestTui { app, terminal }
+    }
+    pub fn draw(&mut self) {
+        self.app.draw_frame(&mut self.terminal).unwrap();
+    }
 
-        handle_key_event(&mut app, KeyCode::Left.into());
-        assert_eq!(app.counter, 0);
+    pub fn handle_event(&mut self, event: Event) {
+        handle_event(&mut self.app.state, event);
+    }
 
-        handle_key_event(&mut app, KeyCode::Char('q').into());
-        assert!(app.exit);
-
-        Ok(())
+    pub fn backend(&self) -> &TestBackend {
+        self.terminal.backend()
     }
 }

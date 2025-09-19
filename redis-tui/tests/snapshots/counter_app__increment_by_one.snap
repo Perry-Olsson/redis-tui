@@ -1,0 +1,62 @@
+---
+source: redis-tui/tests/counter_app.rs
+expression: tui.backend()
+---
+TestBackend {
+    buffer: Buffer {
+        area: Rect { x: 0, y: 0, width: 70, height: 30 },
+        content: [
+            "┏━━━━━━━━━━━━━━━━━━━━━━━ Counter App Tutorial ━━━━━━━━━━━━━━━━━━━━━━━┓",
+            "┃                              Value: 1                              ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┃                                                                    ┃",
+            "┗━━━━━━━━━━━ Decrement <Left> Increment <Right> Quit <Q> ━━━━━━━━━━━━┛",
+        ],
+        styles: [
+            x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 24, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: BOLD,
+            x: 46, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 38, y: 1, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 39, y: 1, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 23, y: 29, fg: Green, bg: Reset, underline: Reset, modifier: BOLD,
+            x: 29, y: 29, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 40, y: 29, fg: Green, bg: Reset, underline: Reset, modifier: BOLD,
+            x: 47, y: 29, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 53, y: 29, fg: Green, bg: Reset, underline: Reset, modifier: BOLD,
+            x: 57, y: 29, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        ]
+    },
+    scrollback: Buffer {
+        area: Rect { x: 0, y: 0, width: 70, height: 0 }
+    },
+    cursor: false,
+    pos: (
+        0,
+        0,
+    ),
+}
