@@ -4,31 +4,18 @@
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{backend::TestBackend, Terminal};
 use redis_tui::counter_app::{App, EventReader};
-use std::{sync::{mpsc, Arc, Mutex}, thread, time::Duration};
+use rstest::{fixture, rstest};
+use std::{sync::{mpsc::{self, Sender}, Arc, Mutex}, thread, time::Duration};
 
-#[test]
-#[ignore]
-fn simple_hello_world() {
-    /* let backend = TestBackend::new(30, 10);
-    let mut terminal = Terminal::new(backend).unwrap();
-    terminal.draw(draw_hello).expect("Failed to draw");
-
-    terminal.backend().assert_buffer_lines([
-        "Hello world!                  ",
-        "                              ",
-        "                              ",
-        "                              ",
-        "                              ",
-        "                              ",
-        "                              ",
-        "                              ",
-        "                              ",
-        "                              ",
-    ]); */
+#[rstest]
+fn counter_app_start_up(tui: Tui) {
+    let event = KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE);
+    tui.tx.send(Event::Key(event)).unwrap();
+    insta::assert_debug_snapshot!(tui.app.lock().unwrap().backend().buffer());
 }
 
-#[test]
-fn counter_app_start_up() {
+#[fixture]
+fn tui() -> Tui {
     let backend = TestBackend::new(30, 10);
     let terminal = Terminal::new(backend).unwrap();
     let (tx, rx) = mpsc::channel();
@@ -40,9 +27,12 @@ fn counter_app_start_up() {
     });
 
     thread::sleep(Duration::from_millis(1));
-    let event = KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE);
-    tx.send(Event::Key(event)).unwrap();
-    println!("{:?}", app.lock().unwrap().backend().buffer())
+    Tui { app, tx }
+}
+
+pub struct Tui {
+    app: Arc<Mutex<App<TestBackend, TestEventReader>>>,
+    tx: Sender<Event>
 }
 
 #[derive(Debug)]

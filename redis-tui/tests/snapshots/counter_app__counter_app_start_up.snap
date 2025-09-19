@@ -1,0 +1,30 @@
+---
+source: redis-tui/tests/counter_app.rs
+expression: tui.app.lock().unwrap().backend().buffer()
+---
+Buffer {
+    area: Rect { x: 0, y: 0, width: 30, height: 10 },
+    content: [
+        "┏━━━ Counter App Tutorial ━━━┓",
+        "┃          Value: 0          ┃",
+        "┃                            ┃",
+        "┃                            ┃",
+        "┃                            ┃",
+        "┃                            ┃",
+        "┃                            ┃",
+        "┃                            ┃",
+        "┃                            ┃",
+        "┗nt <Left> Increment <Right> ┛",
+    ],
+    styles: [
+        x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        x: 4, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: BOLD,
+        x: 26, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        x: 18, y: 1, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+        x: 19, y: 1, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        x: 4, y: 9, fg: Green, bg: Reset, underline: Reset, modifier: BOLD,
+        x: 10, y: 9, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        x: 21, y: 9, fg: Green, bg: Reset, underline: Reset, modifier: BOLD,
+        x: 28, y: 9, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+    ]
+}
