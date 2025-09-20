@@ -2,6 +2,7 @@ use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::backend::TestBackend;
+use ratatui::CompletedFrame;
 use ratatui::{
     prelude::Backend,
     style::Stylize,
@@ -33,9 +34,8 @@ impl App {
         Ok(())
     }
 
-    fn draw_frame<T: Backend>(&mut self, terminal: &mut Terminal<T>) -> io::Result<()> {
-        terminal.draw(|frame| frame.render_widget(&self.state, frame.area()))?;
-        Ok(())
+    fn draw_frame<'a, T: Backend>(&mut self, terminal: &'a mut Terminal<T>) -> io::Result<CompletedFrame<'a>> {
+        terminal.draw(|frame| frame.render_widget(&self.state, frame.area()))
     }
 
     fn read_and_handle_events(&mut self) -> io::Result<()> {
