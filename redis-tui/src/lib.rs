@@ -1,8 +1,6 @@
-pub mod counter_app;
 mod tests;
+pub mod counter_app;
 
-use std::io;
-
-pub fn run() -> io::Result<()> {
+pub fn run() -> std::io::Result<()> {
     counter_app::run()
 }
