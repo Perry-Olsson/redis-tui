@@ -1,5 +1,5 @@
+use crate::counter_app::test_tui::{TestTui};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
-use redis_tui::counter_app::{TestTui};
 use rstest::{fixture, rstest};
 
 #[rstest]

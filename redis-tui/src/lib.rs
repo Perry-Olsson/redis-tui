@@ -1,4 +1,5 @@
 pub mod counter_app;
+mod tests;
 
 use std::io;
 

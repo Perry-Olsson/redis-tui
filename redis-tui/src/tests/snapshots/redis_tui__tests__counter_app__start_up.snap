@@ -1,5 +1,5 @@
 ---
-source: redis-tui/tests/counter_app.rs
+source: redis-tui/src/tests/counter_app.rs
 expression: tui.backend()
 ---
 TestBackend {
@@ -7,7 +7,7 @@ TestBackend {
         area: Rect { x: 0, y: 0, width: 70, height: 30 },
         content: [
             "┏━━━━━━━━━━━━━━━━━━━━━━━ Counter App Tutorial ━━━━━━━━━━━━━━━━━━━━━━━┓",
-            "┃                              Value: 1                              ┃",
+            "┃                              Value: 0                              ┃",
             "┃                                                                    ┃",
             "┃                                                                    ┃",
             "┃                                                                    ┃",

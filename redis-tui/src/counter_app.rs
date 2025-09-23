@@ -1,7 +1,6 @@
 use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
-use ratatui::backend::TestBackend;
 use ratatui::CompletedFrame;
 use ratatui::{
     prelude::Backend,
@@ -21,12 +20,12 @@ pub fn run() -> io::Result<()> {
 }
 
 #[derive(Debug, Default)]
-pub struct App {
+struct App {
     state: AppState
 }
 
 impl App {
-    pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
+    fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
         while !self.state.exit {
             self.draw_frame(terminal)?;
             self.read_and_handle_events()?;
@@ -65,7 +64,7 @@ fn handle_key_event(state: &mut AppState, event: KeyEvent) {
 
 
 #[derive(Debug, Default)]
-pub struct AppState {
+struct AppState {
     counter: u8,
     exit: bool
 }
@@ -113,27 +112,33 @@ impl Widget for &AppState {
     }
 }
 
-pub struct TestTui {
-    app: App,
-    terminal: Terminal<TestBackend>
-}
+#[cfg(test)]
+pub mod test_tui {
+    use super::*;
+    use ratatui::backend::TestBackend;
 
-impl TestTui {
-    pub fn new(width: u16, height: u16) -> TestTui {
-        let backend = TestBackend::new(width, height);
-        let terminal = Terminal::new(backend).unwrap();
-        let app = App::default();
-        TestTui { app, terminal }
-    }
-    pub fn draw(&mut self) {
-        self.app.draw_frame(&mut self.terminal).unwrap();
+    pub struct TestTui {
+        app: App,
+        terminal: Terminal<TestBackend>
     }
 
-    pub fn handle_event(&mut self, event: Event) {
-        handle_event(&mut self.app.state, event);
-    }
+    impl TestTui {
+        pub fn new(width: u16, height: u16) -> TestTui {
+            let backend = TestBackend::new(width, height);
+            let terminal = Terminal::new(backend).unwrap();
+            let app = App::default();
+            TestTui { app, terminal }
+        }
+        pub fn draw(&mut self) {
+            self.app.draw_frame(&mut self.terminal).unwrap();
+        }
 
-    pub fn backend(&self) -> &TestBackend {
-        self.terminal.backend()
+        pub fn handle_event(&mut self, event: Event) {
+            handle_event(&mut self.app.state, event);
+        }
+
+        pub fn backend(&self) -> &TestBackend {
+            self.terminal.backend()
+        }
     }
 }
