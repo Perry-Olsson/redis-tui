@@ -1,13 +1,12 @@
 use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use ratatui::layout::Rect;
 use ratatui::CompletedFrame;
 use ratatui::{
     prelude::Backend,
-    style::Stylize,
     symbols::border,
-    text::{Line, Text},
-    widgets::{Block, Paragraph, Widget},
+    widgets::{Block, Widget},
     DefaultTerminal,
     Terminal
 };
@@ -33,8 +32,8 @@ impl App {
         Ok(())
     }
 
-    fn draw_frame<'a, T: Backend>(&mut self, terminal: &'a mut Terminal<T>) -> io::Result<CompletedFrame<'a>> {
-        terminal.draw(|frame| frame.render_widget(&self.state, frame.area()))
+    fn draw_frame<'a, T: Backend>(&self, terminal: &'a mut Terminal<T>) -> io::Result<CompletedFrame<'a>> {
+        terminal.draw(|frame| frame.render_widget(self, frame.area()))
     }
 
     fn read_and_handle_events(&mut self) -> io::Result<()> {
@@ -42,6 +41,19 @@ impl App {
         Ok(())
     }
 
+}
+
+impl Widget for &App {
+    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer) {
+        Block::bordered()
+            .title("First block")
+            .border_set(border::THICK)
+            .render(Rect::new(0, 0, area.width / 2, area.height), buf);
+        Block::bordered()
+            .title("Second block")
+            .border_set(border::THICK)
+            .render(Rect::new(area.width / 2, 0, area.width / 2, area.height), buf);
+    }
 }
 
 fn handle_event(state: &mut AppState, event: Event) {
@@ -80,35 +92,6 @@ impl AppState {
     
     fn decremenet_counter(&mut self) {
         self.counter -= 1;
-    }
-}
-
-impl Widget for &AppState {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer) {
-        let title = Line::from(" Counter App Tutorial ".bold());
-        let instructions = Line::from(vec![
-            " Decrement ".into(),
-            "<Left>".green().bold(),
-            " Increment ".into(),
-            "<Right>".green().bold(),
-            " Quit ".into(),
-            "<Q> ".green().bold()
-        ]);
-
-        let block = Block::bordered()
-            .title(title.centered())
-            .title_bottom(instructions.centered())
-            .border_set(border::THICK);
-
-        let counter_text = Text::from(vec![Line::from(vec![
-                "Value: ".into(),
-                self.counter.to_string().yellow()
-        ])]);
-
-        Paragraph::new(counter_text)
-            .centered()
-            .block(block)
-            .render(area, buf);
     }
 }
 
