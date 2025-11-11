@@ -1,7 +1,11 @@
 use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
-use ratatui::layout::Rect;
+use ratatui::buffer::Buffer;
+use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::style::{Color, Style, Stylize};
+use ratatui::text::{Line, Span};
+use ratatui::widgets::{List, Padding, Paragraph, Wrap};
 use ratatui::CompletedFrame;
 use ratatui::{
     prelude::Backend,
@@ -44,16 +48,46 @@ impl App {
 }
 
 impl Widget for &App {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer) {
-        Block::bordered()
-            .title("First block")
-            .border_set(border::THICK)
-            .render(Rect::new(0, 0, area.width / 2, area.height), buf);
-        Block::bordered()
-            .title("Second block")
-            .border_set(border::THICK)
-            .render(Rect::new(area.width / 2, 0, area.width / 2, area.height), buf);
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![
+                Constraint::Percentage(10),
+                Constraint::Percentage(30),
+                Constraint::Percentage(60),
+            ])
+            .split(area);
+        render_connection_info_block(layout[0], buf);
+        render_commands_block(layout[1], buf);
+        render_results_block(layout[2], buf);
     }
+}
+
+fn render_connection_info_block(area: Rect, buf: &mut Buffer) {
+    Block::bordered()
+        .title("Connection Info ".bold())
+        .border_set(border::THICK)
+        .render(area, buf);
+}
+
+fn render_commands_block(area: Rect, buf: &mut Buffer) {
+    let block = Block::bordered()
+        .padding(Padding::new(1, 0, 0, 0))
+        .title("[1]".bold())
+        .title("Commands ".bold())
+        .border_set(border::THICK);
+
+    List::new(["KEYS *", "HGETALL post:16"])
+        .block(block)
+        .render(area, buf);
+}
+
+fn render_results_block(area: Rect, buf: &mut Buffer) {
+    Block::bordered()
+        .title("[2]".bold())
+        .title("Results ".bold())
+        .border_set(border::THICK)
+        .render(area, buf);
 }
 
 fn handle_event(state: &mut AppState, event: Event) {
@@ -67,8 +101,6 @@ fn handle_event(state: &mut AppState, event: Event) {
 
 fn handle_key_event(state: &mut AppState, event: KeyEvent) {
     match event.code {
-        KeyCode::Left => state.decremenet_counter(),
-        KeyCode::Right => state.increment_counter(),
         KeyCode::Char('q') => state.exit(),
         _ => {}
     }
@@ -77,21 +109,12 @@ fn handle_key_event(state: &mut AppState, event: KeyEvent) {
 
 #[derive(Debug, Default)]
 struct AppState {
-    counter: u8,
     exit: bool
 }
 
 impl AppState {
     fn exit(&mut self) {
         self.exit = true;
-    }
-
-    fn increment_counter(&mut self) {
-        self.counter += 1;
-    }
-    
-    fn decremenet_counter(&mut self) {
-        self.counter -= 1;
     }
 }
 
